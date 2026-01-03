@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// WriteStructToYAMLFile writes a struct to a YAML file.
+// The file is created if it does not exist, and overwritten if it does.
 func WriteStructToYAMLFile(filename string, data interface{}) error {
 
 	yamlDataHeader := []byte("# PoeBuy config file\n# DO NOT EDIT\n\n")

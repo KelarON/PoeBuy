@@ -11,14 +11,14 @@ import (
 )
 
 type Fetcher struct {
-	Client *http.Client
-	Header http.Header
+	client *http.Client
+	header http.Header
 }
 
 func NewFetcher(client *http.Client, header http.Header) *Fetcher {
 	return &Fetcher{
-		Client: client,
-		Header: header,
+		client: client,
+		header: header,
 	}
 }
 
@@ -33,9 +33,9 @@ func (f *Fetcher) FetchItems(items []string, code string) ([]*models.FetchItem, 
 			return nil, fmt.Errorf("item request creation error: %v", err)
 
 		}
-		ItemReq.Header = f.Header
+		ItemReq.Header = f.header
 
-		ItemResp, err := f.Client.Do(ItemReq)
+		ItemResp, err := f.client.Do(ItemReq)
 		if err != nil {
 			return nil, fmt.Errorf("reqvest sending error: %v", err)
 

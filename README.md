@@ -1,8 +1,8 @@
 # PoeBuy
 
-Simple tool for tracking Path of Exile (POE) live search links with automatic in-game trade messaging.
+Simple tool for tracking Path of Exile (POE) live search links with automatic in-game trade messaging or hideout travel.
 
-> **Disclaimer:** Automated messaging may violate the [Path of Exile Terms of Service](https://www.pathofexile.com/legal/terms-of-use-and-privacy-policy) and could result in account penalties or bans. Use this tool at your own risk.
+> **Disclaimer:** Automated actions may violate the [Path of Exile Terms of Service](https://www.pathofexile.com/legal/terms-of-use-and-privacy-policy) and could result in account penalties or bans. Use this tool at your own risk.
 >
 > The tool respects Path of Exile's rate limits and anti-botting policies by implementing adjustable delays between trade messages and limiting automated actions. Please review and adjust settings to ensure compliance and avoid potential account risks.
 
@@ -11,8 +11,9 @@ Simple tool for tracking Path of Exile (POE) live search links with automatic in
 ## Features
 
 - Track multiple trade links simultaneously
-- Automatically send trade messages in-game
-- Adjustable delay between trade messages for "fast-selling" items
+- Automatically send trade messages in-game (for old style trading)
+- Automatically travel to seller's hideout (for asynchronous trading)
+- Adjustable delay between trade actions for "fast-selling" items
 
 ## Limitations
 

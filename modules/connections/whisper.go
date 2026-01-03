@@ -10,14 +10,14 @@ import (
 )
 
 type Whisper struct {
-	Client *http.Client
-	Header http.Header
+	client *http.Client
+	header http.Header
 }
 
 func NewWhisper(client *http.Client, header http.Header) *Whisper {
 	return &Whisper{
-		Client: client,
-		Header: header,
+		client: client,
+		header: header,
 	}
 }
 
@@ -28,8 +28,8 @@ func (w *Whisper) Whisper(token string) error {
 		return fmt.Errorf("whisper request creation error: %v", err)
 
 	}
-	whisperReq.Header = w.Header
-	whisperResp, err := w.Client.Do(whisperReq)
+	whisperReq.Header = w.header
+	whisperResp, err := w.client.Do(whisperReq)
 	if err != nil {
 		return fmt.Errorf("whisper request error: %v", err)
 

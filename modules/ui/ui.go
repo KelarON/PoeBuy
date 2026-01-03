@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"poebuy/config"
 	"poebuy/modules/bot"
 	"poebuy/modules/connections"
@@ -15,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/go-vgo/robotgo/clipboard"
 	"github.com/sqweek/dialog"
 )
 
@@ -134,6 +136,11 @@ func (ui *UI) tableCellClick(id widget.TableCellID) {
 	}
 
 	switch id.Col {
+	case 1:
+		if ui.cfg.Trade.League != "" {
+			clipboard.WriteAll(fmt.Sprintf("https://www.pathofexile.com/trade/search/%v/%v", ui.cfg.Trade.League, ui.cfg.Trade.Links[id.Row].Code))
+			go ui.mainWindow.ShowLinkCopyPopup()
+		}
 	case 2:
 		if ui.cfg.Trade.Links[id.Row].IsActiv {
 			ui.bot.StopWatcher(ui.cfg.Trade.Links[id.Row].Code)
@@ -172,5 +179,6 @@ func (ui *UI) saveDelay() {
 	}
 	delay, _ := strconv.Atoi(ui.delayWindow.delayEntry.Text)
 	ui.cfg.Trade.Links[ui.delayWindow.linkID].Delay = int64(delay)
+	ui.cfg.Save()
 	ui.delayWindow.Close()
 }

@@ -5,6 +5,7 @@ import (
 	"os/user"
 )
 
+// Encrypt encrypts a string using the user's UID as the key. The encrypted string is then encoded in Base64.
 func Encrypt(input string) (string, error) {
 
 	usr, err := user.Current()
@@ -25,6 +26,7 @@ func Encrypt(input string) (string, error) {
 	return encoded, nil
 }
 
+// Decrypt decrypts a Base64 encoded string using the user's UID as the key.
 func Decrypt(encoded string) (string, error) {
 
 	// Decode the Base64 encoded string

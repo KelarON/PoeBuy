@@ -15,6 +15,7 @@ type FetchItem struct {
 			} `json:"stash"`
 			Whisper      string `json:"whisper"`
 			WhisperToken string `json:"whisper_token"`
+			HideoutToken string `json:"hideout_token"`
 			Account      struct {
 				Name   string `json:"name"`
 				Online struct {

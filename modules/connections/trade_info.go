@@ -51,7 +51,12 @@ func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
 
 	info := &models.TradeInfo{}
 
-	info.Nickname = string(regexp.MustCompile(`account/view-profile/.*?">(.+?)<`).FindSubmatch(bt)[1])
+	nicknameMatches := regexp.MustCompile(`account/view-profile/.*?">(.+?)<`).FindSubmatch(bt)
+	if len(nicknameMatches) == 0 {
+		return nil, ErrorBadPoessid
+	}
+
+	info.Nickname = string(nicknameMatches[1])
 
 	req, err = http.NewRequest(http.MethodGet, "https://api.pathofexile.com/league", nil)
 	if err != nil {

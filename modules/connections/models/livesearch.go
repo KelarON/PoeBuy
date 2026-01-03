@@ -1,7 +1,8 @@
 package models
 
 type LivesearchNewItem struct {
-	New []string `json:"new"`
+	Result string `json:"result"`
+	Count  int    `json:"count"`
 }
 
 type LivesearchAuthStatus struct {
