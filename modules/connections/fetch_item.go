@@ -2,12 +2,11 @@ package connections
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"poebuy/modules/connections/models"
+	"poebuy/utils"
 )
 
 type Fetcher struct {
@@ -46,16 +45,9 @@ func (f *Fetcher) FetchItems(items []string, code string) ([]*models.FetchItem, 
 			continue
 		}
 
-		gz, err := gzip.NewReader(ItemResp.Body)
+		bodyBytes, err := utils.ReadEncodedResponse(ItemResp)
 		if err != nil {
-			return nil, fmt.Errorf("request decoding error: %v", err)
-
-		}
-
-		bodyBytes, err := io.ReadAll(gz)
-		if err != nil {
-			return nil, fmt.Errorf("request reading error: %v", err)
-
+			return nil, fmt.Errorf("error reading response: %v", err)
 		}
 
 		itemInfo := &models.FetchItem{}

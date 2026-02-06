@@ -4,9 +4,11 @@ go 1.24.0
 
 require (
 	fyne.io/fyne/v2 v2.6.1
+	github.com/andybalholm/brotli v1.2.0
 	github.com/go-vgo/robotgo v1.0.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/klauspost/compress v1.18.3
 	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
 	gopkg.in/yaml.v3 v3.0.1
 )

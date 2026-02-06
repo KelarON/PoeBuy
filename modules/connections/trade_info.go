@@ -1,13 +1,13 @@
 package connections
 
 import (
-	"compress/gzip"
 	"encoding/json"
 	"errors"
-	"io"
+	"fmt"
 	"net/http"
 	"poebuy/modules/connections/headers"
 	"poebuy/modules/connections/models"
+	"poebuy/utils"
 	"regexp"
 	"strings"
 )
@@ -30,7 +30,7 @@ func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error making tradeinfo request: %v", err)
 	}
 	defer res.Body.Close()
 
@@ -38,15 +38,9 @@ func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
 		return nil, ErrorBadPoessid
 	}
 
-	gr, err := gzip.NewReader(res.Body)
+	bt, err := utils.ReadEncodedResponse(res)
 	if err != nil {
-		return nil, err
-	}
-	defer gr.Close()
-
-	bt, err := io.ReadAll(gr)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading response: %v", err)
 	}
 
 	info := &models.TradeInfo{}
@@ -74,15 +68,9 @@ func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
 		return nil, ErrorBadPoessid
 	}
 
-	gr2, err := gzip.NewReader(res.Body)
+	bt, err = utils.ReadEncodedResponse(res)
 	if err != nil {
-		return nil, err
-	}
-	defer gr2.Close()
-
-	bt, err = io.ReadAll(gr2)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading response: %v", err)
 	}
 
 	leagues := &models.PoeApiLeagueResponse{}

@@ -6,4 +6,4 @@ run:
 	go run main.go
 
 build:
-	fyne package -os windows --app-build 1 --release
+	fyne package -os windows --release
