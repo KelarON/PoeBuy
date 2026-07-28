@@ -22,7 +22,7 @@ func NewWhisper(client *http.Client, header http.Header) *Whisper {
 }
 
 func (w *Whisper) Whisper(token string) error {
-	jsonBody := []byte(fmt.Sprintf("{\"token\": \"%v\"}", token))
+	jsonBody := fmt.Appendf(nil, "{\"token\": \"%v\"}", token)
 	whisperReq, err := http.NewRequest("POST", "https://www.pathofexile.com/api/trade/whisper", bytes.NewReader(jsonBody))
 	if err != nil {
 		return fmt.Errorf("whisper request creation error: %v", err)

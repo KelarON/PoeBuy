@@ -110,6 +110,11 @@ func (ui *UI) addTrade() {
 
 	var inputLink string
 
+	if ui.mainWindow.nameEntry.Text == "" || ui.mainWindow.linkEntry.Text == "" {
+		dialog.Message("Please fill in all fields").Title("PoeBuy").Error()
+		return
+	}
+
 	if strings.Contains(ui.mainWindow.linkEntry.Text, "pathofexile.com") {
 		inputLink = regexp.MustCompile("[A-Za-z0-9-_]+$").FindString(ui.mainWindow.linkEntry.Text)
 	} else {
