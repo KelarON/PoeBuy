@@ -203,7 +203,9 @@ func (w *MainWindow) OnTableCellClick(f func(id widget.TableCellID)) {
 }
 
 func (w *MainWindow) ShowLinkCopyPopup() {
-	fyne.Do(func() { w.linkCopyPopup.ShowAtPosition(fyne.NewPos(DEFAULT_WINDOW_WIDTH/2, DEFAULT_WINDOW_HEIGHT)) })
+	fyne.Do(func() {
+		w.linkCopyPopup.ShowAtPosition(fyne.NewPos(DEFAULT_WINDOW_WIDTH/2, DEFAULT_WINDOW_HEIGHT-w.linkCopyPopup.Size().Height))
+	})
 	time.Sleep(1500 * time.Millisecond)
 	fyne.Do(w.linkCopyPopup.Hide)
 }
