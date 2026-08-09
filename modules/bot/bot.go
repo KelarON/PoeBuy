@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"net/http"
 	"poebuy/config"
 	"poebuy/modules/connections"
@@ -21,10 +22,14 @@ type Bot struct {
 	UpdateCheckmarkFunc func(int)
 	hideoutVisitsQueue  *utils.AsyncQueue[string]
 	visitDelay          *int
+	visitorCtx          context.Context
+	visitorCancel       context.CancelFunc
 }
 
 // Init initializes the application
 func NewBot(cfg *config.Config, logger *utils.Logger) (*Bot, error) {
+
+	visitorCtx, visitorCancel := context.WithCancel(context.Background())
 
 	bot := &Bot{
 		errChan:            make(chan error),
@@ -33,10 +38,12 @@ func NewBot(cfg *config.Config, logger *utils.Logger) (*Bot, error) {
 		watchers:           make(map[string]*watchers.ItemWatcher),
 		hideoutVisitsQueue: utils.NewAsyncQueue[string](MAX_TRADES_IN_QUEUE),
 		visitDelay:         &cfg.Trade.VisitDelay,
+		visitorCtx:         visitorCtx,
+		visitorCancel:      visitorCancel,
 	}
 
 	go bot.errorWriter()
-	go bot.startVisitor()
+	go bot.startVisitor(bot.visitorCtx)
 
 	cfg.DefineErrorChannel(bot.errChan)
 
@@ -96,15 +103,27 @@ func (bot *Bot) errorWriter() {
 	}
 }
 
-func (bot *Bot) startVisitor() {
+func (bot *Bot) startVisitor(ctx context.Context) {
 	whisper := connections.NewWhisper(&http.Client{}, headers.GetWhisperHeaders(bot.config.General.Poesessid))
 	for {
-		token := *bot.hideoutVisitsQueue.Pop()
-		err := whisper.Whisper(token)
+		token := bot.hideoutVisitsQueue.Pop(ctx)
+		if token == nil {
+			break
+		}
+		err := whisper.Whisper(*token)
 		if err != nil {
 			bot.errChan <- err
 			continue
 		}
 		time.Sleep(time.Second * time.Duration(*bot.visitDelay))
 	}
+}
+
+func (bot *Bot) RestartVisitor() {
+
+	bot.visitorCancel()
+	visitorCtx, visitorCancel := context.WithCancel(context.Background())
+	bot.visitorCtx = visitorCtx
+	bot.visitorCancel = visitorCancel
+	go bot.startVisitor(bot.visitorCtx)
 }

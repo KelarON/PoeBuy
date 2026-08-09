@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"sync"
 )
 
@@ -21,9 +22,13 @@ func NewAsyncQueue[T any](queueSize int) *AsyncQueue[T] {
 }
 
 // Pop removes and returns the oldest item from the queue. If the queue is empty, it blocks until an item is available.
-func (q *AsyncQueue[T]) Pop() *T {
-	item := <-q.queueChan
-	return item
+func (q *AsyncQueue[T]) Pop(ctx context.Context) *T {
+	select {
+	case <-ctx.Done():
+		return nil
+	case item := <-q.queueChan:
+		return item
+	}
 }
 
 // Push adds an item to the queue. If the queue is full, it removes the oldest item before adding the new one.

@@ -98,6 +98,8 @@ func (ui *UI) savePoessid() {
 	}
 	ui.info = info
 	ui.cfg.General.Poesessid = ui.poesessidwindow.poesessidEntry.Text
+	ui.cfg.Save()
+	ui.bot.RestartVisitor()
 	ui.ShowMainWindow()
 	ui.poesessidwindow.Close()
 }

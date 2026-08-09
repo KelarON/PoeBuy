@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"poebuy/config"
 	"poebuy/modules/connections/models"
+	"slices"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -45,6 +46,10 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 	leagueLabel := widget.NewLabel("League:")
 	leagueLabel.Move(fyne.NewPos(15, 10))
 
+	if !slices.Contains(info.GetLeagues(), cfg.Trade.League) {
+		cfg.Trade.League = info.GetLeagues()[0]
+		cfg.Save()
+	}
 	leagueBind := binding.BindString(&cfg.Trade.League)
 	leagueBind.AddListener(binding.NewDataListener(cfg.Save))
 	leagueSelect := widget.NewSelectWithData(info.GetLeagues(), leagueBind)
