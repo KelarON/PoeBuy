@@ -15,7 +15,7 @@ import (
 var ErrorBadPoessid = errors.New("can't get trade info, check POESSID")
 
 const (
-	_PcLeagueId = "pc"
+	PC_LEAGUE_ID = "pc"
 )
 
 func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
@@ -81,7 +81,7 @@ func GetTradeInfo(poesessid string) (*models.TradeInfo, error) {
 	}
 
 	for _, l := range leagues.Leagues {
-		if l.Realm == _PcLeagueId && !strings.Contains(l.Description, "SSF") {
+		if l.Realm == PC_LEAGUE_ID && !strings.Contains(l.Description, "SSF") {
 			info.Leagues = append(info.Leagues, models.League{ID: l.ID, Realm: l.Realm, Text: l.Name})
 		}
 	}

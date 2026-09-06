@@ -1,5 +1,5 @@
 [Details]
-  Icon = "divine.ico"
+  Icon = "../../angry_divine.png"
   Name = "PoeBuy"
   ID = "com.kelaron.poebuy"
   Version = "1.3.3"

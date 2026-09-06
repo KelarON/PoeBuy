@@ -16,9 +16,11 @@ var ErrorNoConfigFile = errors.New("Config file not found")
 
 // Config is the main configuration struct
 type Config struct {
-	General General `yaml:"general"`
-	Trade   Trade   `yaml:"trade"`
-	errChan chan error
+	General        General `yaml:"general"`
+	Trade          Trade   `yaml:"trade"`
+	UpdateRequired bool    `yaml:"-"`
+	Debug          bool    `env:"Debug" yaml:"-"`
+	errChan        chan error
 }
 
 type General struct {

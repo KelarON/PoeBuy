@@ -10,32 +10,30 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type DelayWindow struct {
+type SettingsWindow struct {
 	fyne.Window
 
 	delayEntry    *widget.Entry
 	confirmButton *widget.Button
 	cancelButton  *widget.Button
-	linkID        int
 }
 
-func NewDelayWindow(app fyne.App, delay int64, linkId int) *DelayWindow {
+func NewSettingsWindow(app fyne.App) *SettingsWindow {
 
-	dw := &DelayWindow{linkID: linkId}
+	dw := &SettingsWindow{}
 
-	DelayWindow := app.NewWindow("Delay change")
-	DelayWindow.SetFixedSize(true)
-	DelayWindow.Resize(fyne.NewSize(405, 150))
-	DelayWindow.CenterOnScreen()
-	dw.Window = DelayWindow
+	SettingsWindow := app.NewWindow("Settings")
+	SettingsWindow.SetFixedSize(true)
+	SettingsWindow.Resize(fyne.NewSize(405, 405))
+	SettingsWindow.CenterOnScreen()
+	dw.Window = SettingsWindow
 
 	delayEntry := widget.NewEntry()
 	dw.delayEntry = delayEntry
 	delayEntry.Move(fyne.NewPos(10, 20))
 	delayEntry.Resize(fyne.NewSize(380, 40))
 	delayEntry.SetPlaceHolder("Enter delay in milliseconds")
-	delayEntry.SetText(textFromDelay(delay))
-	delayEntry.Validator = validateDelay
+	delayEntry.Validator = validateSettings
 	delayEntry.Refresh()
 
 	confirmButton := widget.NewButton("OK", nil)
@@ -57,11 +55,11 @@ func NewDelayWindow(app fyne.App, delay int64, linkId int) *DelayWindow {
 	return dw
 }
 
-func (w *DelayWindow) OnConfirmDelay(f func()) {
+func (w *SettingsWindow) OnConfirmSettings(f func()) {
 	w.confirmButton.OnTapped = f
 }
 
-func textFromDelay(delay int64) string {
+func textFromSettings(delay int64) string {
 	if delay == 0 {
 		return ""
 	} else {
@@ -69,7 +67,7 @@ func textFromDelay(delay int64) string {
 	}
 }
 
-func validateDelay(s string) error {
+func validateSettings(s string) error {
 	if s == "" {
 		return nil
 	}

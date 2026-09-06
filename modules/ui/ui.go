@@ -21,28 +21,37 @@ import (
 )
 
 type UI struct {
-	app             fyne.App
-	mainWindow      *MainWindow
-	poesessidwindow *PoessidWindow
-	delayWindow     *DelayWindow
-	cfg             *config.Config
-	info            *models.TradeInfo
-	bot             *bot.Bot
+	app                fyne.App
+	mainWindow         *MainWindow
+	poesessidwindow    *PoessidWindow
+	delayWindow        *DelayWindow
+	cfg                *config.Config
+	info               *models.TradeInfo
+	bot                *bot.Bot
+	updateNotification *fyne.Notification
 }
 
-const _appId = "com.kelaron.poebuy"
+const APP_ID = "com.kelaron.poebuy"
 
-func ShowUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) {
+func NewUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) *UI {
 
 	ui := &UI{
 		cfg: cfg,
 		bot: bot,
 	}
 
-	app := app.NewWithID(_appId)
-	app.Settings().SetTheme(theme.DarkTheme())
-	app.SetIcon(resources.ResourceDivineIco)
-	ui.app = app
+	var myApp fyne.App
+
+	if cfg.Debug {
+		myApp = app.NewWithID(APP_ID)
+	} else {
+		myApp = app.New()
+	}
+	myApp.Settings().SetTheme(theme.DarkTheme())
+	if cfg.Debug {
+		myApp.SetIcon(resources.ResourceDivineIco)
+	}
+	ui.app = myApp
 
 	if cfg.General.Poesessid == "" {
 		ui.ShowPoessidWindow()
@@ -50,7 +59,7 @@ func ShowUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) {
 		info, err := connections.GetTradeInfo(ui.cfg.General.Poesessid)
 		if err != nil && err != connections.ErrorBadPoessid {
 			logger.Error(err.Error())
-			return
+			return nil
 		}
 		if err == connections.ErrorBadPoessid {
 			ui.ShowPoessidWindow()
@@ -60,6 +69,13 @@ func ShowUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) {
 		}
 	}
 	bot.UpdateCheckmarkFunc = ui.updateCheckmark
+
+	ui.updateNotification = fyne.NewNotification("Update Ready", "Please restart the app to apply the latest updates")
+
+	return ui
+}
+
+func (ui *UI) Run() {
 	ui.app.Run()
 }
 
@@ -197,4 +213,10 @@ func (ui *UI) logout() {
 	ui.cfg.Save()
 	ui.mainWindow.Close()
 	ui.ShowPoessidWindow()
+}
+
+func (ui *UI) ShowUpdateNotification() {
+	if ui.updateNotification != nil {
+		ui.app.SendNotification(ui.updateNotification)
+	}
 }

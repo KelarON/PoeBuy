@@ -3,3 +3,5 @@ config.yaml
 .vscode
 /logs
 PoeBuy.exe
+PoeBuyUpdater.exe
+/UpdateCache
