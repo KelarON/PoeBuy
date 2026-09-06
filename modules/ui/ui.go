@@ -80,6 +80,7 @@ func (ui *UI) ShowMainWindow() {
 	ui.mainWindow.SetOnClosed(ui.closeApp)
 	ui.mainWindow.OnAddTrade(ui.addTrade)
 	ui.mainWindow.OnTableCellClick(ui.tableCellClick)
+	ui.mainWindow.OnLogout(ui.logout)
 	ui.mainWindow.Show()
 }
 
@@ -188,4 +189,12 @@ func (ui *UI) saveDelay() {
 	ui.cfg.Trade.Links[ui.delayWindow.linkID].Delay = int64(delay)
 	ui.cfg.Save()
 	ui.delayWindow.Close()
+}
+
+func (ui *UI) logout() {
+	ui.bot.StopAllWatchers()
+	ui.cfg.General.Poesessid = ""
+	ui.cfg.Save()
+	ui.mainWindow.Close()
+	ui.ShowPoessidWindow()
 }

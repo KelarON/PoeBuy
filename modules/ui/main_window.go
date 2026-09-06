@@ -31,6 +31,7 @@ type MainWindow struct {
 	tradeTable      *widget.Table
 	visitDelayEntry *widget.Entry
 	linkCopyPopup   *widget.PopUp
+	logoutButton    *widget.Button
 }
 
 func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *MainWindow {
@@ -75,8 +76,13 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 	visitDelayLabel2.Move(fyne.NewPos(555, 50))
 
 	nicknameLabel := widget.NewLabel("Logged in as " + info.Nickname)
-	nicknameLabel.Move(fyne.NewPos(630-float32(len(info.Nickname)*7), 10))
+	nicknameLabel.Move(fyne.NewPos(700-float32(len(nicknameLabel.Text))*8, 10))
 	nicknameLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	logoutButton := widget.NewButtonWithIcon("Logout", theme.LogoutIcon(), nil)
+	mw.logoutButton = logoutButton
+	logoutButton.Move(fyne.NewPos(700, 17))
+	logoutButton.Resize(fyne.NewSize(80, 23))
 
 	addTradeLabel := widget.NewLabel("Add trade links:")
 	addTradeLabel.Move(fyne.NewPos(15, 100))
@@ -132,7 +138,7 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 			case 1:
 				label.Show()
 				icon.Hide()
-				label.SetText(cfg.Trade.Links[i.Row].Code)
+				label.SetText("Click to copy")
 			case 2:
 				label.Hide()
 				icon.Show()
@@ -185,6 +191,7 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 		leagueLabel,
 		leagueSelect,
 		nicknameLabel,
+		mw.logoutButton,
 		addTradeLabel,
 		nameEntry,
 		linkEntry,
@@ -205,6 +212,10 @@ func (w *MainWindow) OnAddTrade(f func()) {
 
 func (w *MainWindow) OnTableCellClick(f func(id widget.TableCellID)) {
 	w.tradeTable.OnSelected = f
+}
+
+func (w *MainWindow) OnLogout(f func()) {
+	w.logoutButton.OnTapped = f
 }
 
 func (w *MainWindow) ShowLinkCopyPopup() {
