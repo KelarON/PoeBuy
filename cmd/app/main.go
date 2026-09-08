@@ -39,13 +39,15 @@ func main() {
 	updater := utils.NewUpdater(logger)
 
 	// Check for updates
-	go updater.PrepareUpdate(updaterFile, &cfg.UpdateRequired, ui.ShowUpdateNotification)
+	if cfg.General.AutoUpdates {
+		go updater.PrepareUpdate(updaterFile, &cfg.Service.UpdateRequired, ui.ShowUpdateNotification)
+	}
 
 	// Run the UI
 	ui.Run()
 
 	// If an update is prepared, trigger the update process
-	if cfg.UpdateRequired {
+	if cfg.Service.UpdateRequired && cfg.General.AutoUpdates {
 		updater.TriggerUpdate()
 	}
 }

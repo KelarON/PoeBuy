@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MAX_PROCESSABLE_ITEMS = 3
+	maxProcessableItems = 3
 )
 
 type ItemWatcher struct {
@@ -96,8 +96,8 @@ func (w *ItemWatcher) Watch() {
 			w.errChan <- err
 			continue
 		}
-		if w.delay != 0 && len(itemsInfo) > MAX_PROCESSABLE_ITEMS {
-			itemsInfo = itemsInfo[:MAX_PROCESSABLE_ITEMS]
+		if w.delay != 0 && len(itemsInfo) > maxProcessableItems {
+			itemsInfo = itemsInfo[:maxProcessableItems]
 		}
 
 		for _, itemInfo := range itemsInfo {
@@ -137,6 +137,6 @@ func (w *ItemWatcher) delayer() {
 			return
 		}
 		w.readReady = true
-		time.Sleep(w.delay)
+		time.Sleep(utils.LurkDuration(w.delay))
 	}
 }

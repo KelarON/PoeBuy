@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const LOG_DIRECTORY = "logs"
+const logDirectory = "logs"
 
 // Logger struct to hold the logger instance
 type Logger struct {
@@ -24,7 +24,7 @@ func NewLogger() *Logger {
 	// Prepare the log file path with the current date and time
 	currentTime := time.Now().Format("2006-01-02")
 	fileName := fmt.Sprintf("log_%s.log", currentTime)
-	filePath := filepath.Join(LOG_DIRECTORY, fileName)
+	filePath := filepath.Join(logDirectory, fileName)
 
 	return &Logger{filePath: filePath}
 }

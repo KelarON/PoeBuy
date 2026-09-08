@@ -15,7 +15,6 @@ type DelayWindow struct {
 
 	delayEntry    *widget.Entry
 	confirmButton *widget.Button
-	cancelButton  *widget.Button
 	linkID        int
 }
 
@@ -23,11 +22,11 @@ func NewDelayWindow(app fyne.App, delay int64, linkId int) *DelayWindow {
 
 	dw := &DelayWindow{linkID: linkId}
 
-	DelayWindow := app.NewWindow("Delay change")
-	DelayWindow.SetFixedSize(true)
-	DelayWindow.Resize(fyne.NewSize(405, 150))
-	DelayWindow.CenterOnScreen()
-	dw.Window = DelayWindow
+	delayWindow := app.NewWindow("Delay change")
+	delayWindow.SetFixedSize(true)
+	delayWindow.Resize(fyne.NewSize(405, 150))
+	delayWindow.CenterOnScreen()
+	dw.Window = delayWindow
 
 	delayEntry := widget.NewEntry()
 	dw.delayEntry = delayEntry
@@ -40,12 +39,11 @@ func NewDelayWindow(app fyne.App, delay int64, linkId int) *DelayWindow {
 
 	confirmButton := widget.NewButton("OK", nil)
 	dw.confirmButton = confirmButton
-	confirmButton.Move(fyne.NewPos(210, 80))
+	confirmButton.Move(fyne.NewPos(10, 80))
 	confirmButton.Resize(fyne.NewSize(180, 40))
 
 	cancelButton := widget.NewButton("Cancel", func() { dw.Close() })
-	dw.cancelButton = cancelButton
-	cancelButton.Move(fyne.NewPos(10, 80))
+	cancelButton.Move(fyne.NewPos(210, 80))
 	cancelButton.Resize(fyne.NewSize(180, 40))
 
 	dw.SetContent(container.NewWithoutLayout(

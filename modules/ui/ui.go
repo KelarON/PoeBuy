@@ -25,13 +25,14 @@ type UI struct {
 	mainWindow         *MainWindow
 	poesessidwindow    *PoessidWindow
 	delayWindow        *DelayWindow
+	settingsWindow     *SettingsWindow
 	cfg                *config.Config
 	info               *models.TradeInfo
 	bot                *bot.Bot
 	updateNotification *fyne.Notification
 }
 
-const APP_ID = "com.kelaron.poebuy"
+const appId = "com.kelaron.poebuy-debug"
 
 func NewUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) *UI {
 
@@ -42,13 +43,13 @@ func NewUI(cfg *config.Config, logger *utils.Logger, bot *bot.Bot) *UI {
 
 	var myApp fyne.App
 
-	if cfg.Debug {
-		myApp = app.NewWithID(APP_ID)
+	if cfg.Service.Debug {
+		myApp = app.NewWithID(appId)
 	} else {
 		myApp = app.New()
 	}
 	myApp.Settings().SetTheme(theme.DarkTheme())
-	if cfg.Debug {
+	if cfg.Service.Debug {
 		myApp.SetIcon(resources.ResourceDivineIco)
 	}
 	ui.app = myApp
@@ -97,13 +98,26 @@ func (ui *UI) ShowMainWindow() {
 	ui.mainWindow.OnAddTrade(ui.addTrade)
 	ui.mainWindow.OnTableCellClick(ui.tableCellClick)
 	ui.mainWindow.OnLogout(ui.logout)
+	ui.mainWindow.OnSettings(ui.ShowSettingsWindow)
 	ui.mainWindow.Show()
 }
 
 func (ui *UI) ShowDelayWindow(delay int64, linkId int) {
+	if ui.delayWindow != nil {
+		ui.delayWindow.Close()
+	}
 	ui.delayWindow = NewDelayWindow(ui.app, delay, linkId)
 	ui.delayWindow.OnConfirmDelay(ui.saveDelay)
 	ui.delayWindow.Show()
+}
+
+func (ui *UI) ShowSettingsWindow() {
+	if ui.settingsWindow != nil {
+		ui.settingsWindow.Close()
+	}
+	ui.settingsWindow = NewSettingsWindow(ui.app, ui.cfg)
+	ui.settingsWindow.OnSaveSettings(ui.saveSettings)
+	ui.settingsWindow.Show()
 }
 
 func (ui *UI) savePoessid() {
@@ -122,6 +136,7 @@ func (ui *UI) savePoessid() {
 }
 
 func (ui *UI) Close() {
+	ui.bot.StopPoeLogMonitor()
 	ui.app.Quit()
 }
 
@@ -192,8 +207,15 @@ func (ui *UI) tableCellClick(id widget.TableCellID) {
 }
 
 func (ui *UI) closeApp() {
+	if ui.delayWindow != nil {
+		ui.delayWindow.Close()
+	}
+	if ui.settingsWindow != nil {
+		ui.settingsWindow.Close()
+	}
 	ui.cfg.Save()
 	ui.bot.StopAllWatchers()
+	ui.bot.StopPoeLogMonitor()
 }
 
 func (ui *UI) saveDelay() {
@@ -207,11 +229,31 @@ func (ui *UI) saveDelay() {
 	ui.delayWindow.Close()
 }
 
+func (ui *UI) saveSettings() {
+	*ui.cfg = *ui.settingsWindow.workingCfg
+	ui.cfg.Save()
+	ui.bot.StopAllWatchers()
+	ui.bot.UpdateGamePath(ui.cfg.Trade.GamePath)
+	if ui.cfg.Trade.ReadLog {
+		ui.bot.StartPoeLogMonitor()
+	} else {
+		ui.bot.StopPoeLogMonitor()
+	}
+	ui.mainWindow.tradeTable.Refresh()
+	ui.settingsWindow.Close()
+}
+
 func (ui *UI) logout() {
 	ui.bot.StopAllWatchers()
 	ui.cfg.General.Poesessid = ""
 	ui.cfg.Save()
 	ui.mainWindow.Close()
+	if ui.delayWindow != nil {
+		ui.delayWindow.Close()
+	}
+	if ui.settingsWindow != nil {
+		ui.settingsWindow.Close()
+	}
 	ui.ShowPoessidWindow()
 }
 

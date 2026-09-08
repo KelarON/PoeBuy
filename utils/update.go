@@ -17,18 +17,21 @@ import (
 )
 
 const (
-	UPDATE_CACHE_DIR  = "UpdateCache"
-	UPDATER_FILE_NAME = "PoeBuyUpdater.exe"
-	UPDATE_FILE_NAME  = "PoeBuy.exe"
+	updateCacheDirectory = "UpdateCache"
+	updaterFileName      = "PoeBuyUpdater.exe"
+	updatingFileName     = "PoeBuy.exe"
 )
 
 type Updater struct {
-	logger *Logger
+	logger         *Logger
+	currentVersion string
 }
 
 func NewUpdater(logger *Logger) *Updater {
+
 	return &Updater{
-		logger: logger,
+		logger:         logger,
+		currentVersion: GetCurrentVersion(),
 	}
 }
 
@@ -43,11 +46,9 @@ func (u *Updater) PrepareUpdate(updater []byte, updateRequired *bool, showUpdate
 
 	u.logger.Info("Checking for updates...")
 
-	// Get the current version of the application
-	curVersion := u.getCurrentVersion()
-
 	// If the current version is "dev", we don't need to check for updates
-	if curVersion == "dev" {
+	if u.currentVersion == "dev" {
+		u.logger.Info("Running in debug mode, skipping...")
 		return
 	}
 
@@ -59,15 +60,15 @@ func (u *Updater) PrepareUpdate(updater []byte, updateRequired *bool, showUpdate
 	}
 
 	// Compare versions
-	if compareVersions(curVersion, release.GetVersion()) {
-		u.logger.Infof("An update is available. Current version: %s, Latest version: %s", curVersion, release.GetVersion())
+	if compareVersions(u.currentVersion, release.GetVersion()) {
+		u.logger.Infof("An update is available. Current version: %s, Latest version: %s", u.currentVersion, release.GetVersion())
 	} else {
 		u.logger.Info("App is up to date.")
 		return
 	}
 
 	// Create the update directory if it doesn't exist
-	if _, err := os.Stat(UPDATE_CACHE_DIR); os.IsNotExist(err) {
+	if _, err := os.Stat(updateCacheDirectory); os.IsNotExist(err) {
 		err := u.createUpdateDirectory()
 		if err != nil {
 			u.logger.Errorf("Failed to create update directory: %v", err)
@@ -83,7 +84,7 @@ func (u *Updater) PrepareUpdate(updater []byte, updateRequired *bool, showUpdate
 	}
 
 	// Save the downloaded file to the update directory
-	updateFilePath := UPDATE_CACHE_DIR + "/" + UPDATE_FILE_NAME
+	updateFilePath := updateCacheDirectory + "/" + updatingFileName
 	err = SaveRelease(release, updateFilePath)
 	if err != nil {
 		u.logger.Errorf("Failed to save update file: %v", err)
@@ -96,12 +97,12 @@ func (u *Updater) PrepareUpdate(updater []byte, updateRequired *bool, showUpdate
 	*updateRequired = true
 
 	// Show the update notification
-	showUpdateNotification()
+	fyne.Do(showUpdateNotification)
 
 }
 
 // getCurrentVersion returns the current version of the application
-func (u *Updater) getCurrentVersion() string {
+func GetCurrentVersion() string {
 	if fyne.CurrentApp().Metadata().Version == "0.0.1" {
 		return "dev"
 	}
@@ -110,7 +111,7 @@ func (u *Updater) getCurrentVersion() string {
 
 // CreateUpdateDirectory creates the update directory if it doesn't exist
 func (u *Updater) createUpdateDirectory() error {
-	err := os.Mkdir(UPDATE_CACHE_DIR, 0755)
+	err := os.Mkdir(updateCacheDirectory, 0755)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func (u *Updater) createUpdateDirectory() error {
 
 func (u *Updater) TriggerUpdate() {
 
-	updaterPath := filepath.Join(UPDATE_CACHE_DIR, UPDATER_FILE_NAME)
+	updaterPath := filepath.Join(updateCacheDirectory, updaterFileName)
 
 	cmd := exec.Command(updaterPath)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -181,7 +182,7 @@ func cleanVersion(v string) string {
 // saveUpdater saves the updater file to the update directory
 func saveUpdater(updater []byte) error {
 
-	updateFilePath := UPDATE_CACHE_DIR + "/" + UPDATER_FILE_NAME
+	updateFilePath := updateCacheDirectory + "/" + updaterFileName
 	err := os.WriteFile(updateFilePath, updater, 0644)
 	if err != nil {
 		return err
@@ -194,7 +195,7 @@ func cleanupUpdateDirectory() error {
 
 	// Try to remove the update directory up to 3 times with a delay in between
 	for i := 0; i < 3; i++ {
-		err := os.RemoveAll(UPDATE_CACHE_DIR)
+		err := os.RemoveAll(updateCacheDirectory)
 		if err == nil {
 			return nil
 		}

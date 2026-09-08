@@ -10,26 +10,28 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-const DEFAULT_VISIT_DELAY = 20
+const defaultVisitDelay = 20
 
 var ErrorNoConfigFile = errors.New("Config file not found")
 
 // Config is the main configuration struct
 type Config struct {
-	General        General `yaml:"general"`
-	Trade          Trade   `yaml:"trade"`
-	UpdateRequired bool    `yaml:"-"`
-	Debug          bool    `env:"Debug" yaml:"-"`
-	errChan        chan error
+	General General `yaml:"general"`
+	Trade   Trade   `yaml:"trade"`
+	Service Service `yaml:"-"`
+	errChan chan error
 }
 
 type General struct {
-	Poesessid string `yaml:"poesessid"`
+	Poesessid   string `yaml:"poesessid"`
+	AutoUpdates bool   `yaml:"auto_updates"`
 }
 
 type Trade struct {
 	League     string `yaml:"league"`
 	VisitDelay int    `yaml:"visit_delay"`
+	ReadLog    bool   `yaml:"read_log"`
+	GamePath   string `yaml:"game_path"`
 	Links      []Link `yaml:"links"`
 }
 
@@ -40,10 +42,22 @@ type Link struct {
 	IsActiv bool   `yaml:"-"`
 }
 
+type Service struct {
+	UpdateRequired bool
+	Debug          bool `env:"Debug"`
+}
+
 // LoadConfig loads the config from config file
 func LoadConfig() (*Config, error) {
 
-	cfg := &Config{}
+	cfg := &Config{
+		General: General{
+			AutoUpdates: true,
+		},
+		Trade: Trade{
+			VisitDelay: 20,
+		},
+	}
 
 	if !configFileExists() {
 		return cfg, ErrorNoConfigFile
@@ -58,7 +72,7 @@ func LoadConfig() (*Config, error) {
 
 	// Set default values
 	if cfg.Trade.VisitDelay == 0 {
-		cfg.Trade.VisitDelay = DEFAULT_VISIT_DELAY
+		cfg.Trade.VisitDelay = defaultVisitDelay
 	}
 
 	return cfg, nil

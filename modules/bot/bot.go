@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const MAX_TRADES_IN_QUEUE = 5
+const maxTradesInQueue = 5
 
 // App is the main application struct
 type Bot struct {
@@ -24,6 +24,7 @@ type Bot struct {
 	visitDelay          *int
 	visitorCtx          context.Context
 	visitorCancel       context.CancelFunc
+	poeLogMonitor       *utils.PoeLogMonitor
 }
 
 // Init initializes the application
@@ -36,16 +37,21 @@ func NewBot(cfg *config.Config, logger *utils.Logger) (*Bot, error) {
 		config:             cfg,
 		logger:             logger,
 		watchers:           make(map[string]*watchers.ItemWatcher),
-		hideoutVisitsQueue: utils.NewAsyncQueue[string](MAX_TRADES_IN_QUEUE),
+		hideoutVisitsQueue: utils.NewAsyncQueue[string](maxTradesInQueue),
 		visitDelay:         &cfg.Trade.VisitDelay,
 		visitorCtx:         visitorCtx,
 		visitorCancel:      visitorCancel,
+		poeLogMonitor:      utils.NewPoeLogMonitor(logger, cfg.Trade.GamePath),
 	}
 
 	go bot.errorWriter()
 	go bot.startVisitor(bot.visitorCtx)
 
 	cfg.DefineErrorChannel(bot.errChan)
+
+	if cfg.Trade.ReadLog {
+		bot.poeLogMonitor.Start()
+	}
 
 	return bot, nil
 }
@@ -115,7 +121,12 @@ func (bot *Bot) startVisitor(ctx context.Context) {
 			bot.errChan <- err
 			continue
 		}
-		time.Sleep(time.Second * time.Duration(*bot.visitDelay))
+		if bot.config.Trade.ReadLog {
+			if !bot.poeLogMonitor.RequestLoadingScreen() {
+				continue
+			}
+		}
+		time.Sleep(utils.LurkDuration(time.Second * time.Duration(*bot.visitDelay)))
 	}
 }
 
@@ -126,4 +137,16 @@ func (bot *Bot) RestartVisitor() {
 	bot.visitorCtx = visitorCtx
 	bot.visitorCancel = visitorCancel
 	go bot.startVisitor(bot.visitorCtx)
+}
+
+func (bot *Bot) UpdateGamePath(newPath string) {
+	bot.poeLogMonitor.UpdateGamePath(newPath)
+}
+
+func (bot *Bot) StopPoeLogMonitor() {
+	bot.poeLogMonitor.Stop()
+}
+
+func (bot *Bot) StartPoeLogMonitor() {
+	bot.poeLogMonitor.Start()
 }

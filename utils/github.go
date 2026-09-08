@@ -61,7 +61,7 @@ func (r *ReleaseInfo) download() ([]byte, error) {
 	var downloadURL string
 
 	for _, asset := range r.Assets {
-		if asset.Name == UPDATE_FILE_NAME {
+		if asset.Name == updatingFileName {
 			downloadURL = asset.BrowserDownloadURL
 			break
 		}

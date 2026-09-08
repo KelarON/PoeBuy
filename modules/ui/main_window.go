@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"poebuy/config"
 	"poebuy/modules/connections/models"
+	"poebuy/utils"
 	"slices"
 	"time"
 
@@ -17,8 +18,8 @@ import (
 )
 
 const (
-	DEFAULT_WINDOW_WIDTH  = 800
-	DEFAULT_WINDOW_HEIGHT = 600
+	DefaultWindowWidth  = 800
+	DefaultWindowHeight = 605
 )
 
 type MainWindow struct {
@@ -32,6 +33,7 @@ type MainWindow struct {
 	visitDelayEntry *widget.Entry
 	linkCopyPopup   *widget.PopUp
 	logoutButton    *widget.Button
+	settingsButton  *widget.Button
 }
 
 func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *MainWindow {
@@ -40,7 +42,7 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 
 	mw.Window = app.NewWindow("PoeBuy")
 	mw.SetFixedSize(true)
-	mw.Resize(fyne.NewSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT))
+	mw.Resize(fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight))
 
 	mw.linkCopyPopup = widget.NewPopUp(widget.NewLabel("✔ Link copied"), mw.Canvas())
 
@@ -60,29 +62,20 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 	leagueSelect.PlaceHolder = "Select league"
 	leagueSelect.Refresh()
 
-	visitDelayLabel := widget.NewLabel("Visit time:")
-	visitDelayLabel.Move(fyne.NewPos(400, 50))
-
-	visitDelayBind := binding.BindInt(&cfg.Trade.VisitDelay)
-	visitDelayBind.AddListener(binding.NewDataListener(cfg.Save))
-	visitDelayBindText := binding.IntToString(visitDelayBind)
-	visitDelayEntry := widget.NewEntryWithData(visitDelayBindText)
-	mw.visitDelayEntry = visitDelayEntry
-	visitDelayEntry.Move(fyne.NewPos(480, 50))
-	visitDelayEntry.Resize(fyne.NewSize(75, 40))
-	visitDelayEntry.Refresh()
-
-	visitDelayLabel2 := widget.NewLabel("seconds (for hideout travels)")
-	visitDelayLabel2.Move(fyne.NewPos(555, 50))
-
 	nicknameLabel := widget.NewLabel("Logged in as " + info.Nickname)
-	nicknameLabel.Move(fyne.NewPos(700-float32(len(nicknameLabel.Text))*8, 10))
+	nicknameLabel.Alignment = fyne.TextAlignTrailing
+	nicknameLabel.Move(fyne.NewPos(700, 10))
 	nicknameLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	logoutButton := widget.NewButtonWithIcon("Logout", theme.LogoutIcon(), nil)
 	mw.logoutButton = logoutButton
 	logoutButton.Move(fyne.NewPos(700, 17))
 	logoutButton.Resize(fyne.NewSize(80, 23))
+
+	settingsButton := widget.NewButtonWithIcon("", theme.SettingsIcon(), nil)
+	mw.settingsButton = settingsButton
+	settingsButton.Move(fyne.NewPos(743, 90))
+	settingsButton.Resize(fyne.NewSize(40, 40))
 
 	addTradeLabel := widget.NewLabel("Add trade links:")
 	addTradeLabel.Move(fyne.NewPos(15, 100))
@@ -187,20 +180,23 @@ func NewMainWindow(app fyne.App, info *models.TradeInfo, cfg *config.Config) *Ma
 	tradeTable.ShowHeaderRow = true
 	tradeTable.Refresh()
 
+	versionLabel := widget.NewLabel("version: " + utils.GetCurrentVersion())
+	versionLabel.SizeName = theme.SizeNameCaptionText
+	versionLabel.Move(fyne.NewPos(700, 573))
+
 	mw.SetContent(container.NewWithoutLayout(
 		leagueLabel,
 		leagueSelect,
 		nicknameLabel,
-		mw.logoutButton,
+		logoutButton,
+		settingsButton,
 		addTradeLabel,
 		nameEntry,
 		linkEntry,
 		addTradeRectangle,
 		addTradeButton,
 		tradeTable,
-		visitDelayLabel,
-		visitDelayEntry,
-		visitDelayLabel2,
+		versionLabel,
 	))
 
 	return mw
@@ -218,17 +214,20 @@ func (w *MainWindow) OnLogout(f func()) {
 	w.logoutButton.OnTapped = f
 }
 
+func (w *MainWindow) OnSettings(f func()) {
+	w.settingsButton.OnTapped = f
+}
+
 func (w *MainWindow) ShowLinkCopyPopup() {
 	fyne.Do(func() {
-		w.linkCopyPopup.ShowAtPosition(fyne.NewPos(DEFAULT_WINDOW_WIDTH/2, DEFAULT_WINDOW_HEIGHT-w.linkCopyPopup.Size().Height))
+		w.linkCopyPopup.ShowAtPosition(fyne.NewPos(DefaultWindowWidth/2, DefaultWindowHeight-w.linkCopyPopup.Size().Height))
 	})
 	time.Sleep(1500 * time.Millisecond)
 	fyne.Do(w.linkCopyPopup.Hide)
 }
 
-// millisecondsToHumanReadable converts milliseconds to a human-readable string.
-// If the input is 0, it returns "no delay".
-// Otherwise, it returns a string representing the time in seconds, minutes, or hours.
+// millisecondsToHumanReadable converts milliseconds to a human-readable string
+// If the input is 0, it returns "no delay"
 func millisecondsToHumanReadable(ms int64) string {
 
 	if ms == 0 {

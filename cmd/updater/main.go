@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	UPDATE_CACHE_DIR = "UpdateCache"
-	UPDATE_FILE_NAME = "PoeBuy.exe"
+	updateCacheDirectory = "UpdateCache"
+	updateFileName       = "PoeBuy.exe"
 )
 
 func main() {
@@ -22,12 +22,12 @@ func main() {
 	currentDir := filepath.Dir(exePath)
 
 	// Check if the current directory is the UpdateCache directory
-	if filepath.Base(currentDir) != UPDATE_CACHE_DIR {
+	if filepath.Base(currentDir) != updateCacheDirectory {
 		return
 	}
 
-	sourceFile := filepath.Join(currentDir, UPDATE_FILE_NAME)
-	targetFile := filepath.Join(filepath.Dir(currentDir), UPDATE_FILE_NAME)
+	sourceFile := filepath.Join(currentDir, updateFileName)
+	targetFile := filepath.Join(filepath.Dir(currentDir), updateFileName)
 
 	// Retry the rename operation multiple times in case the file is still in use
 	for i := 0; i < 10; i++ {
